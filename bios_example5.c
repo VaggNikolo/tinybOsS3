@@ -107,7 +107,7 @@ void bootfunc()
 			break;
 	}
 
-	fprintf(fterm, "Bye bye\n"); 
+	fprintf(fterm, "Bye bye nigger\n"); 
 	fflush(fterm);
 
 
