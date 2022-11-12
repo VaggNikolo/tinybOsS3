@@ -40,7 +40,7 @@ static inline void initialize_PCB(PCB* pcb)
   for(int i=0;i<MAX_FILEID;i++)
     pcb->FIDT[i] = NULL;
 
-  rlnode_init(&pcb->ptcb_list,NULL);
+  rlnode_init(& pcb->ptcb_list,NULL);
   rlnode_init(& pcb->children_list, NULL);
   rlnode_init(& pcb->exited_list, NULL);
   rlnode_init(& pcb->children_node, pcb);
@@ -195,7 +195,7 @@ Pid_t sys_Exec(Task call, int argl, void* args)
     ptcb -> detached = 0;
     ptcb -> exit_cv = COND_INIT;
 
-    rlnode_init(&newproc->ptcb_list,newproc); //initialize a list of tcbs
+    rlnode_init(&newproc->ptcb_list,newproc); //initialize a list of ptcbs
     rlnode_init(&ptcb-> ptcb_list_node,ptcb); //initialize a ptcb node
     rlist_push_back(&newproc->ptcb_list,&ptcb->ptcb_list_node); //add the ptcb node to the ptcb list
     newproc-> thread_count = 1;
