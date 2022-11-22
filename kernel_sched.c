@@ -577,7 +577,7 @@ static void idle_thread()
  */
 void initialize_scheduler()
 {
-	for(i=0;i<N; i++) {
+	for(int i=0;i<N; i++) {
 		rlnode_init(&SCHED[i], NULL);
 	}
 	rlnode_init(&TIMEOUT_LIST, NULL);
