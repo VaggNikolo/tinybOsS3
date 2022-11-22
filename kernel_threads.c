@@ -84,13 +84,12 @@ int sys_ThreadJoin(Tid_t tid, int* exitval)
     kernel_wait(&ptcb->exit_cv,SCHED_USER); // we wait for a thread to terminate
   }
   ptcb->refcount--;
-
-  if(ptcb->detached){
-    return -1;
-  }
   
   if(exitval!=NULL){
     *exitval=ptcb->exitval;
+  }
+  else{
+    exitval = NULL;
   }
   
 
