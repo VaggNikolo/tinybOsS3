@@ -133,12 +133,18 @@ void sys_ThreadExit(int exitval)
 
  
   kernel_broadcast(&ptcb->exit_cv);     //wakeup all waiting ptcbs
+
+    //elegxos threadcount kai refcount
+  if(ptcb->ref_count == 0)
+  rlist_remove(&ptcb->thread_list_node);
     
 
-  PCB *curproc=CURPROC;
+  
 
 ///
   if(CURPROC->thread_count==0){     //if the pcb has no ptcbs
+
+    PCB *curproc=CURPROC;
 
   /* Reparent any children of the exiting process to the 
        initial task */
