@@ -85,9 +85,10 @@ int sys_ThreadJoin(Tid_t tid, int* exitval)
   }
   ptcb->refcount--;
 
-  if(ptcb->detached) {
+  /*if(ptcb->detached) {
     return -1;
   }
+  */
 
 
   if(exitval!=NULL){
