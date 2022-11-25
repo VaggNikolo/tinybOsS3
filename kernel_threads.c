@@ -24,11 +24,10 @@ void begin_thread(){
 Tid_t sys_CreateThread(Task task, int argl, void* args)
 {
 	if (task!=NULL){
-  TCB* tcb = spawn_thread(CURPROC,begin_thread); //create a tcb
   PTCB* ptcb = (PTCB*)xmalloc(sizeof(PTCB));     //aquiring a PTCB
   ptcb -> task = task;                           //initializing its values
   ptcb -> argl = argl;
-  ptcb->args=args;
+  ptcb->args=(args == NULL)?NULL:args;
 
   ptcb -> exitval = CURPROC -> exitval;
   ptcb -> exited = 0;
@@ -36,12 +35,21 @@ Tid_t sys_CreateThread(Task task, int argl, void* args)
   ptcb -> refcount = 0 ;
   ptcb -> exit_cv = COND_INIT;
 
-  tcb -> ptcb = ptcb; //we link ptcb with tcb
+
+
+  CURPROC -> thread_count ++;
+
+  CURTHREAD->ptcb = ptcb;
+
+  TCB* tcb = spawn_thread(CURPROC,begin_thread); //create a tcb
+
   ptcb -> tcb = tcb;  //we link tcb with ptcb
+  tcb -> ptcb = ptcb; //we link ptcb with tcb
+  ptcb->tcb->owner_pcb = tcb->owner_pcb;
 
   rlnode_init(&ptcb-> ptcb_list_node,ptcb); //initialize a ptcb list node 
   rlist_push_back(&CURPROC->ptcb_list,&ptcb->ptcb_list_node);// place it in the last pos of the thread list (ptcb list)
-  CURPROC -> thread_count ++;
+
   wakeup(ptcb->tcb); //wake up tcb
   return (Tid_t) ptcb;
 
