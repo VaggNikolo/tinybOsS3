@@ -93,6 +93,9 @@ int sys_ThreadJoin(Tid_t tid, int* exitval)
   if(exitval!=NULL){
     *exitval=ptcb->exitval;
   }
+  else {
+    exitval = NULL;
+  }
 
 
   if(ptcb->refcount == 0)
