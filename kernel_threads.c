@@ -135,8 +135,8 @@ void sys_ThreadExit(int exitval)
   kernel_broadcast(&ptcb->exit_cv);     //wakeup all waiting ptcbs
 
     //elegxos threadcount kai refcount
-  if(ptcb->ref_count == 0)
-  rlist_remove(&ptcb->thread_list_node);
+  if(ptcb->refcount == 0)
+  rlist_remove(&ptcb->ptcb_list_node);
     
 
   
