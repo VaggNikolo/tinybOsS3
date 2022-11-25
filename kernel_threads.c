@@ -75,7 +75,7 @@ int sys_ThreadJoin(Tid_t tid, int* exitval)
     return -1;
   }
 
-  if(ptcb-> exited == 1 && ptcb -> detached == 1 ){  //cannot join an exited or detached ptcb
+  if(ptcb-> exited == 1 || ptcb -> detached == 1 ){  //cannot join an exited or detached ptcb
         
     return -1;
   }
