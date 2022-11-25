@@ -33,7 +33,7 @@ Tid_t sys_CreateThread(Task task, int argl, void* args)
   ptcb -> exitval = CURPROC -> exitval;
   ptcb -> exited = 0;
   ptcb -> detached = 0;
-  ptcb -> refcount = 1 ;
+  ptcb -> refcount = 0 ;
   ptcb -> exit_cv = COND_INIT;
 
   tcb -> ptcb = ptcb; //we link ptcb with tcb
