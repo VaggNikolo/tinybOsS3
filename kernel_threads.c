@@ -75,7 +75,7 @@ int sys_ThreadJoin(Tid_t tid, int* exitval)
 
   ptcb->refcount--;
 
-  if(ptcb-> detached == 1{  //cannot join an exited or detached ptcb      
+  if(ptcb-> detached == 1){  //cannot join an exited or detached ptcb      
     return -1;
   }
 
