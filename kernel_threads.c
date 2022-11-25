@@ -113,10 +113,10 @@ int sys_ThreadDetach(Tid_t tid)
   }
   ptcb->detached=1;       //set to detached
 
-  if(ptcb->refcount>=1){              //if there are ptcbs that are sleeping
-    kernel_broadcast(&ptcb->exit_cv); //wakeup all waiting ptcbs
-    ptcb->refcount=0;                 //set the refcount counter to 0 (no waiting ptcbs)
-  }
+
+  kernel_broadcast(&ptcb->exit_cv); //wakeup all waiting ptcbs
+
+
 
   return 0;
 }
@@ -132,7 +132,7 @@ void sys_ThreadExit(int exitval)
   CURPROC->thread_count--;
 
  
-    kernel_broadcast(&ptcb->exit_cv);     //wakeup all waiting ptcbs
+  kernel_broadcast(&ptcb->exit_cv);     //wakeup all waiting ptcbs
     
 
   PCB *curproc=CURPROC;
