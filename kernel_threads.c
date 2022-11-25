@@ -195,7 +195,6 @@ void sys_ThreadExit(int exitval)
   curproc->pstate = ZOMBIE;
 
 }
-  CURPROC->exitval=exitval;
 
   /* Bye-bye cruel world */
   kernel_sleep(EXITED, SCHED_USER);
