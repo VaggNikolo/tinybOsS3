@@ -54,7 +54,10 @@ Tid_t sys_CreateThread(Task task, int argl, void* args)
   return (Tid_t) ptcb;
 
   }
-  return NOTHREAD;
+  else{
+    return NOTHREAD;
+  }
+
 }
 
 /**
