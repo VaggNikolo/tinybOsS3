@@ -62,47 +62,35 @@ Tid_t sys_ThreadSelf()
   */
 int sys_ThreadJoin(Tid_t tid, int* exitval)
 {
-	PTCB* ptcb = NULL;
-  if(rlist_find(&CURPROC->ptcb_list,(PTCB*)tid,NULL)){ //search the ptcb_list for the given tid (see if it exists)
-    ptcb = (PTCB*)tid;
+	PTCB* ptcb = (PTCB*)tid;
+  if(tid == NOTHREAD || (rlist_find(&CURPROC->ptcb_list,ptcb,0)) == NULL || tid == sys_ThreadSelf()){ //search the ptcb_list for the given tid (see if it exists)
+      return -1;
   }
   
-  if(ptcb==NULL){
-    return -1;
-  }
-
-  if(sys_ThreadSelf() == tid){ //cannot join the same thread
-    return -1;
-  }
-
-  if(ptcb-> exited == 1 && ptcb -> detached == 1 ){  //cannot join an exited or detached ptcb
-        
-    return -1;
-  }
   ptcb->refcount++;
-  while(ptcb-> exited != 1 && ptcb -> detached != 1 ){
+
+  while(ptcb-> exited == 0 && ptcb -> detached == 0 ){
     kernel_wait(&ptcb->exit_cv,SCHED_USER); // we wait for a thread to terminate
   }
+
   ptcb->refcount--;
 
-  /*if(ptcb->detached) {
+  if(ptcb-> detached == 1){  //cannot join an exited or detached ptcb      
     return -1;
   }
-  */
 
 
-  if(exitval!=NULL){
+
+  if(ptcb->exited == 1) {
+    if(exitval!=NULL){
     *exitval=ptcb->exitval;
-  }
-  else {
-    exitval = NULL;
-  }
-
-
-  if(ptcb->refcount == 0)
-  {
+    }
+    if(ptcb->refcount == 0)
+    {
     rlist_remove(&ptcb->ptcb_list_node);//remove from from list
     free(ptcb);
+    }
+
   }
 
   return 0;
@@ -125,10 +113,10 @@ int sys_ThreadDetach(Tid_t tid)
   }
   ptcb->detached=1;       //set to detached
 
-  if(ptcb->refcount>=1){              //if there are ptcbs that are sleeping
-    kernel_broadcast(&ptcb->exit_cv); //wakeup all waiting ptcbs
-    ptcb->refcount=0;                 //set the refcount counter to 0 (no waiting ptcbs)
-  }
+
+  kernel_broadcast(&ptcb->exit_cv); //wakeup all waiting ptcbs
+
+
 
   return 0;
 }
@@ -144,7 +132,7 @@ void sys_ThreadExit(int exitval)
   CURPROC->thread_count--;
 
  
-    kernel_broadcast(&ptcb->exit_cv);     //wakeup all waiting ptcbs
+  kernel_broadcast(&ptcb->exit_cv);     //wakeup all waiting ptcbs
     
 
   PCB *curproc=CURPROC;
