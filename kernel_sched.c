@@ -329,16 +329,19 @@ static void sched_wakeup_expired_timeouts()
 */
 static TCB* sched_queue_select(TCB* current)
 {
-	int priority_selection=N-1;		
-	for(int i=N-1; i>=0; i--){				//starting from the highest queue we go all the way to the bottom
-		if(!is_rlist_empty(&SCHED[i])){ //if the queue is not empty we leave the loop and priority_selection becomes the level of the queue
-			priority_selection=i;					
+	int curr_priority = N - 1;
+	for (int i = N - 1; i >= 0; i--) //We start a loop from the second highest level of priority, to the lowest
+	{ 
+		if (!is_rlist_empty(&SCHED[i])) //On every loop, if the queue of the level isn't empty,
+										//we break the loop and curr_priority changes to the one of the loop
+		{ 
+			curr_priority = i;
 			break;
 		}
 	}
-	
+
 	/* Get the head of the SCHED list */
-	rlnode* sel = rlist_pop_front(&SCHED[priority_selection]);
+	rlnode* sel = rlist_pop_front(&SCHED[curr_priority]);
 
 	TCB* next_thread = sel->tcb; /* When the list is empty, this is NULL */
 
@@ -416,11 +419,12 @@ void sleep_releasing(Thread_state state, Mutex* mx, enum SCHED_CAUSE cause,
 
 void yield(enum SCHED_CAUSE cause)
 {
-	int static increase = 0;			//every MaxIncrease times increase the priorities of all threads to avoid starvation
-    increase++;									
-    if(increase == MaxIncrease){
+	int static increment = 0;			//Once we reach the limit of MaxIncrease, we increase this counter,
+										//which represents the priorities of all threads, to prevent starvation
+    increment++;									
+    if(increment == MaxIncrease){
         increase_priorities();	
-        increase = 0;						//reset the increase counter
+        increment = 0;						//Resetting the counter
     }
 	
 	
@@ -464,20 +468,20 @@ void yield(enum SCHED_CAUSE cause)
 
 	switch(cause)
   {
-    case SCHED_QUANTUM:						//when a thread uses a quantum and has not finished yet (longrunning thread/process)
-      if(current->priority!=0){		//if thread priority is not zero
-    	  current->priority--;			//decrease priority by 1
+    case SCHED_QUANTUM:				//The thread uses a quantum but hasn't terminated yet
+      if(current->priority!=0){		//Checking if the priority isn't 0
+    	  current->priority--;		//Decreasing it
       }
       break;
-     case SCHED_IO:								//when a thread gives up before quantum (interactive thread)
-      if(current->priority!=N-1){ //if thread priority is not the highest possible (N-1) 
-      	current->priority++;			//increse priority by 1
+     case SCHED_IO:						//The thread leaves before the quantum
+      if(current->priority!=N-1){ 		//Checking if the priority isn't the highest
+      	current->priority++;			//Increasing it
       } 
       break;	
-     case SCHED_MUTEX:																	//when a thread wants to take a mutex but the mutex is already used by a lower priority thread
-       if(current->last_cause==current->curr_cause){		//if the previous yield of the same thread was called with SCHED_MUTEX
-     	  if(current->priority!=0){												//if thread priority is not zero
-    	  current->priority--;														//decrease priority by 1
+     case SCHED_MUTEX:										//When a thread wants to gain control of the mutex, but it is used by a thread with lower priority
+       if(current->last_cause==current->curr_cause){		//If previous yield of the thread was called with SCHED_MUTEX
+     	  if(current->priority!=0){							//Checking its priority is not zero
+    	  current->priority--;								//Decreasing it
       }
     }
       break;
@@ -491,16 +495,19 @@ void yield(enum SCHED_CAUSE cause)
 	gain(preempt);
 }
 
-void increase_priorities(){
-	for(int i=0; i<N-1; i++){															//for every queue except the highest one
-		if(!is_rlist_empty(&SCHED[i])){											//if the queue is not empty
-			for(int j=0; j<rlist_len(&SCHED[i]); j++){				//for every thread of the queue
-				TCB *tcb = rlist_pop_front(&SCHED[i])->tcb;			//every loop we remove the first thread of the current queue
-				tcb->priority++;																//and increase its the priority by one
-				rlist_push_back(&SCHED[i+1], &tcb->sched_node);	//then push it at the back of the next higher queue
+void increase_priorities()
+{
+	for (int i = 0; i < N - 1; i++)
+	{ //Running a loop for every priority except the highest possible
+		if (!is_rlist_empty(&SCHED[i])) //Checking if the queue is empty
+		{ 
+			for (int j = 0; j < rlist_len(&SCHED[i]); j++)	//For every thread in our queue
+			{													  
+				TCB *tcb = rlist_pop_front(&SCHED[i])->tcb;		  //We "pop" the first thread of the queue
+				tcb->priority++;								  //Then we increase its priority
+				rlist_push_back(&SCHED[i + 1], &tcb->sched_node); //Finally, push it back to the end of the higher priority queue
 			}
 		}
-
 	}
 }
 
@@ -577,6 +584,7 @@ static void idle_thread()
  */
 void initialize_scheduler()
 {
+	//Here we initialize the queues for every level of priority
 	for(int i=0;i<N; i++) {
 		rlnode_init(&SCHED[i], NULL);
 	}

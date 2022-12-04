@@ -180,15 +180,14 @@ Pid_t sys_Exec(Task call, int argl, void* args)
     the initialization of the PCB.
    */
   if(call != NULL) {
-    newproc->main_thread = spawn_thread(newproc, start_main_thread); //create a new tcb
-    PTCB* ptcb = (PTCB*)xmalloc(sizeof(PTCB));                       //aquiring a ptcb
-    ptcb-> tcb = newproc->main_thread;                               //initializing ptcb values
+    newproc->main_thread = spawn_thread(newproc, start_main_thread); //We create a new TCB
+    PTCB* ptcb = (PTCB*)xmalloc(sizeof(PTCB));                       //Allocating for a new PTCB
+    ptcb-> tcb = newproc->main_thread;                               //Initializing the values of our new PTCB
     ptcb->task = newproc -> main_task;
     ptcb->argl = argl;
     ptcb->args = args;
 
-    ptcb->exitval=0;
-    //ptcb -> exitval = newproc -> exitval;
+    ptcb -> exitval=0;
     ptcb -> refcount = 0;
     ptcb -> exited = 0;
     ptcb -> detached = 0;
@@ -196,11 +195,11 @@ Pid_t sys_Exec(Task call, int argl, void* args)
 
     newproc -> main_thread -> ptcb = ptcb;
     
-    rlnode_init(&ptcb-> ptcb_list_node,ptcb); //initialize a ptcb node
-    rlnode_init(&newproc->ptcb_list,ptcb); //initialize a list of ptcbs
-    rlist_push_back(&newproc->ptcb_list,&ptcb->ptcb_list_node); //add the ptcb node to the ptcb list
+    rlnode_init(&ptcb-> ptcb_list_node,ptcb); //Initializing a PTCB node
+    rlnode_init(&newproc->ptcb_list,ptcb); //Creating a list of PTCBs
+    rlist_push_back(&newproc->ptcb_list,&ptcb->ptcb_list_node); //Adding our PTCB node to the list
     newproc-> thread_count = 1;
-    wakeup(newproc->main_thread); //wakeup tcb
+    wakeup(newproc->main_thread); //Wakey-wakey TCB
   }
 
 
