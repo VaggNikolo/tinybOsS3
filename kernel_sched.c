@@ -415,6 +415,22 @@ void sleep_releasing(Thread_state state, Mutex* mx, enum SCHED_CAUSE cause,
 		preempt_on;
 }
 
+void increase_priorities()
+{
+	for (int i = 0; i < N - 1; i++)
+	{ //Running a loop for every priority except the highest possible
+		if (!is_rlist_empty(&SCHED[i])) //Checking if the queue is empty
+		{ 
+			for (int j = 0; j < rlist_len(&SCHED[i]); j++)	//For every thread in our queue
+			{													  
+				TCB *tcb = rlist_pop_front(&SCHED[i])->tcb;		  //We "pop" the first thread of the queue
+				tcb->priority++;								  //Then we increase its priority
+				rlist_push_back(&SCHED[i + 1], &tcb->sched_node); //Finally, push it back to the end of the higher priority queue
+			}
+		}
+	}
+}
+
 /* This function is the entry point to the scheduler's context switching */
 
 void yield(enum SCHED_CAUSE cause)
@@ -495,21 +511,7 @@ void yield(enum SCHED_CAUSE cause)
 	gain(preempt);
 }
 
-void increase_priorities()
-{
-	for (int i = 0; i < N - 1; i++)
-	{ //Running a loop for every priority except the highest possible
-		if (!is_rlist_empty(&SCHED[i])) //Checking if the queue is empty
-		{ 
-			for (int j = 0; j < rlist_len(&SCHED[i]); j++)	//For every thread in our queue
-			{													  
-				TCB *tcb = rlist_pop_front(&SCHED[i])->tcb;		  //We "pop" the first thread of the queue
-				tcb->priority++;								  //Then we increase its priority
-				rlist_push_back(&SCHED[i + 1], &tcb->sched_node); //Finally, push it back to the end of the higher priority queue
-			}
-		}
-	}
-}
+
 
 /*
   This function must be called at the beginning of each new timeslice.
